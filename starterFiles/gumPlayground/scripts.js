@@ -52,3 +52,6 @@ document.querySelector('#share').addEventListener('click', getMicAndCamera);
 document.querySelector('#show-video').addEventListener('click', showMyFeed);
 document.querySelector('#stop-video').addEventListener('click', stopMyFeed);
 document.querySelector('#change-size').addEventListener('click', changeSize);
+document.querySelector('#start-record').addEventListener('click', startRecording);
+document.querySelector('#stop-record').addEventListener('click', stopRecording);
+document.querySelector('#play-record').addEventListener('click', playRecording);
