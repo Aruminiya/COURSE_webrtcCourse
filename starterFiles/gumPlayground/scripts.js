@@ -3,7 +3,7 @@ let stream = null; // Initialize stream to null
 
 const constraints = {
   audio: true, // user's microphone, if available
-  video: true
+  video: { width: 1280, height: 720 } // user's webcam
 };
 
 const getMicAndCamera = async () => {
@@ -42,6 +42,14 @@ const stopMyFeed = () => {
   ]);
 };
 
+const changeSize = () => {
+  changeVideoSize();
+  changeButtons([
+    'green', 'green', 'green', 'blue', 'blue', 'blue', 'blue', 'blue'
+  ]);
+};
+
 document.querySelector('#share').addEventListener('click', getMicAndCamera);
 document.querySelector('#show-video').addEventListener('click', showMyFeed);
 document.querySelector('#stop-video').addEventListener('click', stopMyFeed);
+document.querySelector('#change-size').addEventListener('click', changeSize);
