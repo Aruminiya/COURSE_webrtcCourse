@@ -2,6 +2,10 @@ let mediaRecorder
 let recordedBlobs
 
 const startRecording = () => {
+  if (!stream) {
+    alert('No stream found, please get user media first');
+    return;
+  }
   console.log('startRecording', stream);
   recordedBlobs = []; // 用來存放錄製的二進制媒體數據
   mediaRecorder = new MediaRecorder(stream);
@@ -12,14 +16,28 @@ const startRecording = () => {
     recordedBlobs.push(e.data);
   };
   mediaRecorder.start();
+  changeButtons([
+    'green', 'green', 'blue', 'blue', 'green', 'blue', 'grey', 'blue'
+  ]);
 };
 
 const stopRecording = () => {
+  if (!mediaRecorder) {
+    alert('No mediaRecorder found, please start recording first');
+    return;
+  }
   console.log('stopRecording');
   mediaRecorder.stop();
+  changeButtons([
+    'green', 'green', 'blue', 'blue', 'green', 'green', 'blue', 'blue'
+  ]);
 };
 
 const playRecording = () => {
+  if (!recordedBlobs) {
+    alert('No recordedBlobs found, please start recording first');
+    return;
+  }
   console.log('playRecording');
   // 如果你直接寫成 const superBuffer = recordedBlobs;，
   // 那麼 superBuffer 只是指向 recordedBlobs 陣列的引用，並不會將這些片段合併成一個完整的二進制對象。
@@ -29,4 +47,7 @@ const playRecording = () => {
   recordedVideoEl.src = window.URL.createObjectURL(superBuffer);
   recordedVideoEl.controls = true;
   recordedVideoEl.play();
+  changeButtons([
+    'green', 'green', 'blue', 'blue', 'green', 'green', 'green', 'blue'
+  ]);
 };

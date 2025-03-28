@@ -55,3 +55,4 @@ document.querySelector('#change-size').addEventListener('click', changeSize);
 document.querySelector('#start-record').addEventListener('click', startRecording);
 document.querySelector('#stop-record').addEventListener('click', stopRecording);
 document.querySelector('#play-record').addEventListener('click', playRecording);
+document.querySelector('#share-screen').addEventListener('click', shareScreen);
