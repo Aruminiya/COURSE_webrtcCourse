@@ -43,10 +43,9 @@ const stopMyFeed = () => {
 };
 
 const changeSize = () => {
-  changeVideoSize();
-  changeButtons([
-    'green', 'green', 'green', 'blue', 'blue', 'blue', 'blue', 'blue'
-  ]);
+  const width = document.querySelector('#vid-width').value;
+  const height = document.querySelector('#vid-height').value;
+  changeVideoSize(width, height);
 };
 
 document.querySelector('#share').addEventListener('click', getMicAndCamera);
