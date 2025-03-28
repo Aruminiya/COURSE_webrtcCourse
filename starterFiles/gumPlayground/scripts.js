@@ -1,5 +1,6 @@
 const videoEl = document.querySelector('#my-video');
 let stream = null; // Initialize stream to null
+let mediaStream = null; // Initialize mediaStream to null for screenShare
 
 const constraints = {
   audio: true, // user's microphone, if available
