@@ -16,12 +16,28 @@
   某些情況下，從  協議加載的文件可能不被認為是安全的，因為它們缺乏加密保護。
 */
 
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const app = express();
+const socketIo = require('socket.io');
 const path = require('path');
 const port = 8081; // Port number
 
 app.use(express.static(path.join(__dirname)));
+
+/*
+  我們需要 mkcert 來生成 ssl key 和 cert
+  這樣我們就可以在 localhost 上運行 https server
+  注意：這個 cert 和 key 只能在 localhost 上使用，
+  你不能把它們放到生產環境中使用
+*/ 
+/*
+  $ mkcert creat-ca
+  $ mkcert creat-cert
+*/ 
+const key = fs.readFileSync('cert.key');
+const cert = fs.readFileSync('cert.crt');
 /*
   這行代碼的作用是讓 Express 將當前文件所在的目錄（__dirname）作為靜態文件的根目錄，
   從而允許客戶端直接訪問該目錄中的文件。
@@ -29,6 +45,20 @@ app.use(express.static(path.join(__dirname)));
   那麼客戶端可以通過 http://localhost:3000/index.html 訪問它。
 */
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+// 我們改變了 express sever，讓它可以在 https 上運行
+const expressServer = https.createServer(
+  {
+    key, // SSL key
+    cert, // SSL certificate
+  },
+  app
+);
+const io = socketIo(expressServer, {});
+
+expressServer.listen(port, () => {
+  console.log(`Example app listening at https://localhost:${port}`);
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
 });
