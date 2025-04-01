@@ -1,0 +1,37 @@
+1. 某人必須執行 getUserMedia() - CLIENT1/初始化/呼叫者/Offerer
+2. CLIENT1 創建 RTCPeerConnection
+3. peerConnection 需要 STUN 伺服器
+    - 我們稍後會需要 ICE 候選者
+4. CLIENT1 將本地流的 tracks 添加到 peerConnection
+    - 我們需要將 CLIENT1 的媒體流與 peerConnection 關聯
+5. CLIENT1 創建一個 offer
+    - 需要包含 tracks 的 peerConnection
+    - offer = RTCSessionDescription
+6. SDP - 編解碼器/解析度信息
+7. 類型（offer）
+8. CLIENT1 將 offer 傳遞給 pc.setLocalDescription ~7. ICE 候選者現在可以開始進來（異步） 信令（需要有人幫助瀏覽器找到/與對方通話）
+9. CLIENT1 發送 offer
+    - socket.io 伺服器為另一個瀏覽器保存它
+    - 與 CLIENT1 關聯 ~9. 一旦第 7 步發生，將 ICE 候選者發送到信令伺服器
+    - socket.io 伺服器為另一個瀏覽器保存它
+    - 與 CLIENT1 關聯 CLIENT1 和信令伺服器等待。
+    - 等待回答者/CLIENT2/接收者
+10. CLIENT2 加載網頁並使用 io.connect()
+    - 一個新的客戶端連接到信令/socket.io 伺服器
+11. socket.io 將 RTCSessionDesc 發送給新客戶端
+    - 發送一個 offer！
+12. CLIENT2 執行 getUserMedia()
+13. CLIENT2 創建一個 peerConnection()
+    - 傳遞 STUN 伺服器
+14. CLIENT2 將本地流的 tracks 添加到 peerConnection
+15. CLIENT2 創建一個 answer（createAnswer()）
+    - createAnswer = RTCSessionDescription（sdp/類型）
+16. CLIENT2 將 answer 傳遞給 pc.setLocalDescription
+17. 因為 CLIENT2 已經有 offer，CLIENT2 可以將 offer 傳遞給 pc.setRemoteDescription ~18. 當 setLocalDescription 時，開始收集 ICE 候選者（異步） 信令伺服器一直在等待...
+18. CLIENT2 發送 answer（RTCSessionDesc - sdp/類型）到信令伺服器 ~20. CLIENT2 將監聽來自遠端的 tracks/ICE。
+    - 完成。
+    - 等待 ICE 候選者
+    - 等待 tracks
+19. 信令伺服器監聽 answer，發送 CLIENT1 的 answer（RTCSessionDesc - sdp/類型）
+20. CLIENT1 接收 answer 並將其傳遞給 pc.setRemoteDesc ~23. CLIENT1 等待 ICE 候選者和 tracks
+21 & 23. 在等待 ICE。一旦 ICE 交換完成，tracks 也會交換。
