@@ -36,6 +36,15 @@ const call = async e=>{
     */
     const offer = await peerConnection.createOffer();
     console.log(offer);
+
+    /*
+      setLocalDescription 的核心作用：
+      設置本地端的 SDP 描述。
+      觸發 ICE 候選者的收集。
+      為信令交換做好準備。
+      它是 WebRTC 連接建立過程中的一個關鍵步驟，與 createOffer 或 createAnswer 配合使用。
+    */
+    peerConnection.setLocalDescription(offer);
   } catch (err) {
     console.error(err);
   }
@@ -57,9 +66,25 @@ const createPeerConnection = () => {
       */
       peerConnection.addTrack(track, localStream);
     })
-
+    /* 
+      icecandidate 會查看候選者 
+      WebRTC 會收集多個候選者，然後通過 ICE 協商選擇最佳路徑（例如，P2P 直連或通過 TURN 中繼）。
+      最終使用的 IP 地址是通過 ICE 協商確定的，並不一定是第一個打印出來的候選者。
+    */
     peerConnection.addEventListener('icecandidate', e => {
-      console.log('ICE candidate:', e);
+      console.log('........ICE candidate........');
+      console.log(e);
+    })
+    /*
+      如果你想查看 WebRTC 最終使用的 IP 地址，可以監聽 iceconnectionstatechange 事件，
+      並檢查連接狀態是否變為 connected 或 completed。此時，WebRTC 已經選擇了最終的候選者。
+    */
+    peerConnection.addEventListener('iceconnectionstatechange', e => {
+      console.log('........ICE connection state change........');
+      console.log(e);
+      if (peerConnection.iceConnectionState === 'connected' || peerConnection.iceConnectionState === 'completed') {
+        console.log('WebRTC connected');
+      }
     })
     resolve();
   })
