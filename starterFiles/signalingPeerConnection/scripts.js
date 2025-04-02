@@ -15,6 +15,7 @@ const remoteVideoEl = document.querySelector('#remote-video');
 let localStream;
 let remoteStream;
 let peerConnection;
+let didIOffer = false;
 
 let peerConfiguration = {
   iceServers:[
@@ -46,6 +47,7 @@ const call = async e=>{
       這個 SDP 是用於開始 WebRTC 連接的第一步。
     */
     const offer = await peerConnection.createOffer();
+    didIOffer = true;
     console.log(offer);
 
     /*
@@ -56,7 +58,7 @@ const call = async e=>{
       它是 WebRTC 連接建立過程中的一個關鍵步驟，與 createOffer 或 createAnswer 配合使用。
     */
     peerConnection.setLocalDescription(offer);
-    socket.emit('offer', offer); // 發送 offer 給遠端
+    socket.emit('newOffer', offer); // 發送 offer 給遠端
     console.log('Offer sent to remote peer');
   } catch (err) {
     console.error(err);
@@ -87,6 +89,13 @@ const createPeerConnection = () => {
     peerConnection.addEventListener('icecandidate', e => {
       console.log('........ICE candidate........');
       console.log(e);
+      if (e.candidate) {
+        socket.emit('sendIceCandidateToSignalingServer', {
+          iceCandidate: e.candidate,
+          iceUserName: userName,
+          didIOffer
+        });
+      }
     })
     /*
       如果你想查看 WebRTC 最終使用的 IP 地址，可以監聽 iceconnectionstatechange 事件，

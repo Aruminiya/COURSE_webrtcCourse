@@ -77,7 +77,6 @@ const connectedSockets = [
 ];
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
   const userName = socket.handshake.auth.userName;
   const password = socket.handshake.auth.password;
   console.log(`User ${userName} connected`);
@@ -109,7 +108,24 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('newOfferAwaiting', offers.slice(-1));
 
     console.log('New offer received');
-    console.log(newOffer);
-    console.log(offers);
+    // console.log(newOffer);
+    // console.log(offers);
+  });
+
+  socket.on('sendIceCandidateToSignalingServer', (iceCandidateObj) => {
+    const { didIOffer, iceUserName, iceCandidate } = iceCandidateObj;
+    // console.log('........ICE candidate........');
+    // console.log('didIOffer:', didIOffer );
+    // console.log('iceUserName:', iceUserName );
+    // console.log('iceCandidate:', iceCandidate );
+    if (didIOffer) {
+      const offerInOffers = offers.find(o => o.offererUserName === iceUserName);
+      if (offerInOffers) {
+        offerInOffers.offerIceCandidates.push(iceCandidate);
+        // TODO come bakc to this...
+        // if answer is already here, send the iceCandidate
+      }
+    }
+    console.log('offers:', offers);
   });
 });
