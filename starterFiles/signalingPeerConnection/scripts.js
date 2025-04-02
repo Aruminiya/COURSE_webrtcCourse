@@ -1,4 +1,13 @@
-const socket = io('https://localhost:8081', {});
+const userName = "Rob-"+Math.floor(Math.random()*100000);
+const password = "x";
+document.querySelector('#user-name').innerHTML = userName;
+
+const socket = io('https://localhost:8081', {
+  auth: {
+    userName,
+    password
+  }
+});
 
 const localVideoEl = document.querySelector('#local-video');
 const remoteVideoEl = document.querySelector('#remote-video');
@@ -47,6 +56,8 @@ const call = async e=>{
       它是 WebRTC 連接建立過程中的一個關鍵步驟，與 createOffer 或 createAnswer 配合使用。
     */
     peerConnection.setLocalDescription(offer);
+    socket.emit('offer', offer); // 發送 offer 給遠端
+    console.log('Offer sent to remote peer');
   } catch (err) {
     console.error(err);
   }

@@ -22,6 +22,7 @@ const express = require('express');
 const app = express();
 const socketIo = require('socket.io');
 const path = require('path');
+const { off } = require('process');
 const port = 8081; // Port number
 
 app.use(express.static(path.join(__dirname)));
@@ -59,6 +60,56 @@ expressServer.listen(port, () => {
   console.log(`Example app listening at https://localhost:${port}`);
 });
 
+// offers 將包含 {}
+const offers = [
+  // offererUserName
+  // offer
+  // offerIceCandidates
+  // answererUserName
+  // answer
+  // answerIceCandidates
+];
+
+// connectedSockets 將包含 {}
+const connectedSockets = [
+  // socketId
+  // userName
+];
+
 io.on('connection', (socket) => {
   console.log('A user connected');
+  const userName = socket.handshake.auth.userName;
+  const password = socket.handshake.auth.password;
+  console.log(`User ${userName} connected`);
+  console.log(`Password: ${password}`);
+  console.log(`Socket ID: ${socket.id}`);
+
+  if (password !== 'x') {
+    console.error('Wrong password');
+    socket.disconnect(true);
+    return;
+  }
+  
+  connectedSockets.push({
+    socketId: socket.id,
+    userName,
+  });
+
+  socket.on('newOffer', (newOffer) => {
+    offers.push({
+      offererUserName: userName,
+      offer: newOffer,
+      offerIceCandidates: [],
+      answererUserName: null,
+      answer: null,
+      answerIceCandidates: [],
+    });
+    // send out to all connected sockets EXCEPT the caller 
+    // 發送所有已連接 sockets 除了 caller
+    socket.broadcast.emit('newOfferAwaiting', offers.slice(-1));
+
+    console.log('New offer received');
+    console.log(newOffer);
+    console.log(offers);
+  });
 });
