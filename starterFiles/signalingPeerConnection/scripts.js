@@ -65,6 +65,11 @@ const call = async e=>{
   }
 }
 
+const answerOffer = (offerObj)=>{
+  console.log('offerObj', offerObj);
+  console.log('Answering offer...');
+}
+
 const createPeerConnection = () => {
   return new Promise(async (resolve, reject) => {
   /*
