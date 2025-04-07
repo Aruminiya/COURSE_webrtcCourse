@@ -30,13 +30,11 @@ let peerConfiguration = {
 
 // 當用戶點擊開始按鈕時，請求訪問攝像頭和麥克風
 const call = async e=>{
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true
-  });
-  localVideoEl.srcObject = stream;
-  localStream = stream;
 
+  // 獲取使用者媒體流
+  await fetchUserMedia();
+
+  // peerConnection 已經準備好，並且我們的 STUN servers 已經傳遞過去
   await createPeerConnection();
 
   // create Offer
@@ -57,7 +55,7 @@ const call = async e=>{
       為信令交換做好準備。
       它是 WebRTC 連接建立過程中的一個關鍵步驟，與 createOffer 或 createAnswer 配合使用。
     */
-    peerConnection.setLocalDescription(offer);
+    peerConnection.setLocalDescription(offer); // 這是 CLIENT1，CLIENT1 將 offer 作為本地描述
     socket.emit('newOffer', offer); // 發送 offer 給遠端
     console.log('Offer sent to remote peer');
   } catch (err) {
@@ -65,12 +63,38 @@ const call = async e=>{
   }
 }
 
-const answerOffer = (offerObj)=>{
+const answerOffer = async (offerObj)=>{
+  await fetchUserMedia();
+  await createPeerConnection(offerObj);
+  const answer = await peerConnection.createAnswer({});
+  peerConnection.setLocalDescription(answer); // 這是 CLIENT2，CLIENT2 將 offer 作為本地描述
   console.log('offerObj', offerObj);
-  console.log('Answering offer...');
+  console.log('answer', answer);
 }
 
-const createPeerConnection = () => {
+const fetchUserMedia = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      /*
+        獲取使用者媒體流
+        這裡使用了 getUserMedia API 獲取本地媒體流
+        這個媒體流將用於顯示本地視頻和音頻
+      */
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      });
+      localVideoEl.srcObject = stream;
+      localStream = stream;
+      resolve();
+    } catch (err) {
+      console.error(err);
+      reject(err);
+    }
+  })
+}
+
+const createPeerConnection = (offerObj) => {
   return new Promise(async (resolve, reject) => {
   /*
     創建RTCPeerConnection實例, 這裡使用了STUN伺服器來獲取公共IP地址
@@ -113,6 +137,11 @@ const createPeerConnection = () => {
         console.log('WebRTC connected');
       }
     })
+    if (offerObj) {
+      // 當從 call() 呼叫時，這裡的條件不會成立
+      // 而是 answerOffer() 呼叫時成立
+      peerConnection.setRemoteDescription(offerObj.offer); // 這是 CLIENT2，CLIENT2 將 offer 作為遠端描述
+    }
     resolve();
   })
 }

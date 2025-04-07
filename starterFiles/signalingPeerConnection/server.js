@@ -94,8 +94,8 @@ io.on('connection', (socket) => {
     userName,
   });
 
-  // a new client has joined. If there are any offers available,
-  // emit them out
+  // 一個新的客戶端已加入。如果有任何可用的 offers，
+  // 將它們發送出去
   if(offers.length) {
     socket.emit('availableOffers', offers);
   }
@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
       answer: null,
       answerIceCandidates: [],
     });
-    // send out to all connected sockets EXCEPT the caller 
+
     // 發送所有已連接 sockets 除了 caller
     socket.broadcast.emit('newOfferAwaiting', offers.slice(-1));
 
