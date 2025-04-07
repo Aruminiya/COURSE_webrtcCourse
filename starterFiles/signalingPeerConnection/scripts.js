@@ -67,7 +67,8 @@ const answerOffer = async (offerObj)=>{
   await fetchUserMedia();
   await createPeerConnection(offerObj);
   const answer = await peerConnection.createAnswer({});
-  peerConnection.setLocalDescription(answer); // 這是 CLIENT2，CLIENT2 將 offer 作為本地描述
+  await peerConnection.setLocalDescription(answer); // 這是 CLIENT2，CLIENT2 將 offer 作為本地描述
+  console.log(peerConnection.signalingState) // should be have-local-pranswer, because client2 has setLocalDescription to it's answer (but it won't be)
   console.log('offerObj', offerObj);
   console.log('answer', answer);
 }
@@ -110,6 +111,14 @@ const createPeerConnection = (offerObj) => {
       */
       peerConnection.addTrack(track, localStream);
     })
+
+    peerConnection.addEventListener("signalingstatechange", (e) => {
+      console.log('........Signaling state change........');
+      console.log(e);
+      console.log(peerConnection.signalingState);
+    });
+
+
     /* 
       icecandidate 會查看候選者 
       WebRTC 會收集多個候選者，然後通過 ICE 協商選擇最佳路徑（例如，P2P 直連或通過 TURN 中繼）。
@@ -133,6 +142,7 @@ const createPeerConnection = (offerObj) => {
     peerConnection.addEventListener('iceconnectionstatechange', e => {
       console.log('........ICE connection state change........');
       console.log(e);
+      console.log(peerConnection.iceConnectionState);
       if (peerConnection.iceConnectionState === 'connected' || peerConnection.iceConnectionState === 'completed') {
         console.log('WebRTC connected');
       }
@@ -140,7 +150,9 @@ const createPeerConnection = (offerObj) => {
     if (offerObj) {
       // 當從 call() 呼叫時，這裡的條件不會成立
       // 而是 answerOffer() 呼叫時成立
-      peerConnection.setRemoteDescription(offerObj.offer); // 這是 CLIENT2，CLIENT2 將 offer 作為遠端描述
+      console.log(peerConnection.signalingState) // should be stable because no setDesc has been run yet
+      await peerConnection.setRemoteDescription(offerObj.offer); // 這是 CLIENT2，CLIENT2 將 offer 作為遠端描述
+      console.log(peerConnection.signalingState) // should be have-remote-offer, because client2 has setRemoteDescription on the offer
     }
     resolve();
   })
