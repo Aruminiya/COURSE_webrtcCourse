@@ -10,6 +10,10 @@ socket.on('newOfferAwaiting', (offers) => {
   createOfferEls(offers);
 })
 
+socket.on('answerResponse', (offer) => {
+  console.log('answerResponse', offer);
+  addAnswer(offer);
+});
 
 function createOfferEls(offers) {
   // make green answer button for this new offer

@@ -110,7 +110,8 @@ io.on('connection', (socket) => {
     });
 
     // 發送所有已連接 sockets 除了 caller
-    socket.broadcast.emit('newOfferAwaiting', offers.slice(-1));
+    socket.broadcast.emit('newOfferAwaiting', offers.slice(-1)); 
+    // offers.slice(-1) 的作用是從陣列中提取最後一個元素，並返回一個包含該元素的新陣列。
 
     console.log('New offer received');
     // console.log(newOffer);
@@ -118,7 +119,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('newAnswer', (offerObj) => {
-    console.log('offerObj', offerObj);
+    // console.log('offerObj', offerObj);
     // 將這個 answer (offerObj) 發送回 CLIENT1
     // 為了做到這一點，我們需要 CLIENT1 的 socketId
     const socketToAnswer = connectedSockets.find(
@@ -128,7 +129,31 @@ io.on('connection', (socket) => {
       console.error('socketToAnswer not found');
       return;
     } 
+    // 我們找到了匹配的 socket，因此可以向它發送消息！
     const socketIdToAnswer = socketToAnswer.socketId;
+    // 我們找到要更新的 offer，然後可以發送它
+    const offerToUpdate = offers.find(
+      o => o.offererUserName === offerObj.offererUserName
+    );
+    if (!offerToUpdate) {
+      console.error('offerToUpdate not found');
+      return;
+    }
+    offerToUpdate.answer = offerObj.answer;
+    offerToUpdate.answererUserName = userName;
+    socket.to(socketIdToAnswer).emit('answerResponse', offerToUpdate);
+    /*
+      socket.to 是 Socket.IO 中的一個方法，用於向特定的房間（room）或特定的 socket 發送消息，而不是向所有連接的客戶端廣播消息。
+      在 Socket.IO 中，客戶端可以加入一個或多個房間（room），這些房間是邏輯分組的方式。socket.to 允許你指定一個房間，然後只向該房間內的客戶端發送消息。
+    */
+    /*
+      socket.to(room).emit(eventName, data) 的結構如下：
+
+      room: 目標房間的名稱。
+      emit: 發送事件的方法。
+      eventName: 事件名稱，客戶端會監聽這個事件。
+      data: 發送的數據。
+    */
   });
 
   socket.on('sendIceCandidateToSignalingServer', (iceCandidateObj) => {

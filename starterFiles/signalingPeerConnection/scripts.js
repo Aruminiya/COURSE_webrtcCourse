@@ -78,6 +78,14 @@ const answerOffer = async (offerObj)=>{
   socket.emit('newAnswer', offerObj);
 }
 
+const addAnswer = async (offerObj) => {
+  // addAnswer 在 socketListeners.js 中被呼叫，當 answerResponse 被觸發時
+  // 此時，offerObj 已經在 CLIENT1 和 CLIENT2 之間交換完成
+  // 現在 CLIENT1 需要設定遠端描述
+  await peerConnection.setRemoteDescription(offerObj.answer);
+  // console.log(peerConnection.signalingState) // 應該是 stable，因為 CLIENT1 已經對 answer 呼叫了 setRemoteDescription;
+};
+
 const fetchUserMedia = () => {
   return new Promise(async (resolve, reject) => {
     try {
