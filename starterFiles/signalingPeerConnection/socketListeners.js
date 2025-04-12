@@ -4,7 +4,7 @@ socket.on('availableOffers', (offers) => {
   createOfferEls(offers);
 })
 
-// someone just made a new offer and we're alread herer - call createOfferEls
+// someone just made a new offer and we're already here - call createOfferEls
 socket.on('newOfferAwaiting', (offers) => {
   console.log('newOfferAwaiting', offers);
   createOfferEls(offers);
@@ -12,7 +12,7 @@ socket.on('newOfferAwaiting', (offers) => {
 
 
 function createOfferEls(offers) {
-  // make gerrn answer button for this new offer
+  // make green answer button for this new offer
   const answerEl = document.querySelector('#answer');
   offers.forEach(o => {
     console.log('createOfferEls', o);

@@ -22,7 +22,6 @@ const express = require('express');
 const app = express();
 const socketIo = require('socket.io');
 const path = require('path');
-const { off } = require('process');
 const port = 8081; // Port number
 
 app.use(express.static(path.join(__dirname)));
@@ -79,9 +78,9 @@ const connectedSockets = [
 io.on('connection', (socket) => {
   const userName = socket.handshake.auth.userName;
   const password = socket.handshake.auth.password;
-  console.log(`User ${userName} connected`);
-  console.log(`Password: ${password}`);
-  console.log(`Socket ID: ${socket.id}`);
+  // console.log(`User ${userName} connected`);
+  // console.log(`Password: ${password}`);
+  // console.log(`Socket ID: ${socket.id}`);
 
   if (password !== 'x') {
     console.error('Wrong password');
@@ -118,6 +117,20 @@ io.on('connection', (socket) => {
     // console.log(offers);
   });
 
+  socket.on('newAnswer', (offerObj) => {
+    console.log('offerObj', offerObj);
+    // 將這個 answer (offerObj) 發送回 CLIENT1
+    // 為了做到這一點，我們需要 CLIENT1 的 socketId
+    const socketToAnswer = connectedSockets.find(
+      s => s.userName === offerObj.offererUserName
+    );
+    if (!socketToAnswer) {
+      console.error('socketToAnswer not found');
+      return;
+    } 
+    const socketIdToAnswer = socketToAnswer.socketId;
+  });
+
   socket.on('sendIceCandidateToSignalingServer', (iceCandidateObj) => {
     const { didIOffer, iceUserName, iceCandidate } = iceCandidateObj;
     // console.log('........ICE candidate........');
@@ -128,7 +141,7 @@ io.on('connection', (socket) => {
       const offerInOffers = offers.find(o => o.offererUserName === iceUserName);
       if (offerInOffers) {
         offerInOffers.offerIceCandidates.push(iceCandidate);
-        // TODO come bakc to this...
+        // TODO come back to this...
         // if answer is already here, send the iceCandidate
       }
     }

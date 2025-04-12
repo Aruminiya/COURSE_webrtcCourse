@@ -68,9 +68,14 @@ const answerOffer = async (offerObj)=>{
   await createPeerConnection(offerObj);
   const answer = await peerConnection.createAnswer({});
   await peerConnection.setLocalDescription(answer); // 這是 CLIENT2，CLIENT2 將 offer 作為本地描述
-  console.log(peerConnection.signalingState) // should be have-local-pranswer, because client2 has setLocalDescription to it's answer (but it won't be)
-  console.log('offerObj', offerObj);
-  console.log('answer', answer);
+  // console.log(peerConnection.signalingState) // should be have-local-pranswer, because client2 has setLocalDescription to it's answer (but it won't be)
+  // console.log('offerObj', offerObj);
+  // console.log('answer', answer);
+
+  // 將 answer 添加到 offerObj 中，以便伺服器知道這個 answer 與哪個 offer 相關
+  offerObj.answer = answer; // 將 answer 添加到 offerObj 中
+  // 將 answer 發送給信令伺服器，以便它可以傳送給 CLIENT1
+  socket.emit('newAnswer', offerObj);
 }
 
 const fetchUserMedia = () => {
