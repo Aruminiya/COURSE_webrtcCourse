@@ -191,4 +191,10 @@ const createPeerConnection = (offerObj) => {
   })
 }
 
+const addNewIceCandidate = (iceCandidate) => {
+  // 將 ICE 候選者添加到 peerConnection 中
+  peerConnection.addIceCandidate(iceCandidate);
+  console.log('======Added ICE candidate======');
+}
+
 document.querySelector('#call').addEventListener('click',call);

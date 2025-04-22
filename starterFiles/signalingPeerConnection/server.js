@@ -173,10 +173,24 @@ io.on('connection', (socket) => {
             // 2. 在提議被回答之後進來的任何候選者，都會被傳遞
             if (offerInOffers.answererUserName) {
                 // 將它傳遞給另一個 socket
+                const socketToAnswer = connectedSockets.find(s => s.userName === offerInOffers.answererUserName);
+                if (socketToAnswer) {
+                  socket.to(socketToAnswer.socketId).emit('receivedIceCandidateFromServer', iceCandidate);
+                } else {
+                  console.error('Ice candidate received but could not find answerer');
+                }
             }
       }
     } else {
       // 這個 ICE 候選者來自 answerer。將其發送給 offerer
+      const { iceUserName, iceCandidate } = iceCandidateObj;
+      const offerInOffers = offers.find(o => o.answererUserName === iceUserName);
+      const socketToAnswer = connectedSockets.find(s => s.userName === offerInOffers.offererUserName);
+      if (socketToAnswer) {
+        socket.to(socketToAnswer.socketId).emit('receivedIceCandidateFromServer', iceCandidate);
+      } else {
+        console.error('Ice candidate received but could not find offerer');
+      }
     }
     // console.log('offers:', offers);
   });
