@@ -136,6 +136,8 @@ const createPeerConnection = (offerObj) => {
     這裡使用了Google的STUN伺服器, 你也可以使用自己的STUN伺服器
   */
     peerConnection = await new RTCPeerConnection(peerConfiguration);
+    remoteStream = new MediaStream();
+    remoteVideoEl.srcObject = remoteStream;
 
     localStream.getTracks().forEach(track => {
       /*
@@ -180,6 +182,17 @@ const createPeerConnection = (offerObj) => {
         console.log('WebRTC connected');
       }
     })
+
+    peerConnection.addEventListener('track', e => {
+      console.log('Got a track from the other peer !! How cool is that !!');
+      console.log(e);
+      e.streams[0].getTracks().forEach(track => {
+        console.log(track);
+        remoteStream.addTrack(track, remoteStream);
+        console.log('Here is a exciting track from the other peer !!');
+      })
+    })
+
     if (offerObj) {
       // 當從 call() 呼叫時，這裡的條件不會成立
       // 而是 answerOffer() 呼叫時成立
