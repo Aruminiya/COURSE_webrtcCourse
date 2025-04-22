@@ -118,7 +118,7 @@ io.on('connection', (socket) => {
     // console.log(offers);
   });
 
-  socket.on('newAnswer', (offerObj) => {
+  socket.on('newAnswer', (offerObj, ackFunction) => {
     // console.log('offerObj', offerObj);
     // 將這個 answer (offerObj) 發送回 CLIENT1
     // 為了做到這一點，我們需要 CLIENT1 的 socketId
@@ -139,6 +139,8 @@ io.on('connection', (socket) => {
       console.error('offerToUpdate not found');
       return;
     }
+    // 將我們已經收集到的所有 iceCandidates 發送回 answer
+    ackFunction(offerToUpdate.offerIceCandidates);
     offerToUpdate.answer = offerObj.answer;
     offerToUpdate.answererUserName = userName;
     socket.to(socketIdToAnswer).emit('answerResponse', offerToUpdate);
@@ -163,12 +165,18 @@ io.on('connection', (socket) => {
     // console.log('iceUserName:', iceUserName );
     // console.log('iceCandidate:', iceCandidate );
     if (didIOffer) {
+      // 這個 ICE 候選者來自 offerer。將其發送給 answerer
       const offerInOffers = offers.find(o => o.offererUserName === iceUserName);
       if (offerInOffers) {
         offerInOffers.offerIceCandidates.push(iceCandidate);
-        // TODO come back to this...
-        // if answer is already here, send the iceCandidate
+            // 1. 當回答者回答時，所有現有的 ICE 候選者都會被發送
+            // 2. 在提議被回答之後進來的任何候選者，都會被傳遞
+            if (offerInOffers.answererUserName) {
+                // 將它傳遞給另一個 socket
+            }
       }
+    } else {
+      // 這個 ICE 候選者來自 answerer。將其發送給 offerer
     }
     // console.log('offers:', offers);
   });

@@ -75,7 +75,27 @@ const answerOffer = async (offerObj)=>{
   // 將 answer 添加到 offerObj 中，以便伺服器知道這個 answer 與哪個 offer 相關
   offerObj.answer = answer; // 將 answer 添加到 offerObj 中
   // 將 answer 發送給信令伺服器，以便它可以傳送給 CLIENT1
-  socket.emit('newAnswer', offerObj);
+  // 預期伺服器回應已存在的 ICE 候選者
+  
+  /*
+    emitWithAck
+
+    是一種方法，通常與 WebSocket 通信庫（例如 Socket.IO）一起使用，用於發送事件並等待伺服器的確認（acknowledgment）。它是一個基於 Promise 的方法，允許你在發送事件後處理伺服器的回應。
+
+    在 Socket.IO 中，emitWithAck 是一個變體，類似於 socket.emit，但它會返回一個 Promise，這樣你可以使用 await 或 .then() 來處理伺服器的回應。
+
+    如何運作
+    發送事件：你向伺服器發送一個事件（例如 'newAnswer'），並附帶一些數據（如 offerObj）。
+    等待伺服器回應：伺服器處理該事件後，會回傳一個確認或數據。
+    處理回應：你可以在 Promise resolve 時處理伺服器的回應。
+  */
+  const offerIceCandidates = await socket.emitWithAck('newAnswer', offerObj);
+  offerIceCandidates.forEach(c => {
+    // 將 ICE 候選者添加到 peerConnection 中
+    peerConnection.addIceCandidate(c);
+    console.log('======Added ICE candidate======');
+  })
+  console.log('offerIceCandidates', offerIceCandidates);
 }
 
 const addAnswer = async (offerObj) => {
